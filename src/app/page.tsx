@@ -1,13 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
 
 export default async function Home() {
-  const supabase = await createClient()
-  const { error } = await supabase.auth.getUser()
-  const echec = error && error.name !== 'AuthSessionMissingError'
+  const [row] = await query<{ now: Date }>('select now()')
 
   return (
     <main className="flex min-h-screen items-center justify-center p-8 font-sans">
-      <p>{echec ? `erreur : ${error.message}` : 'connecté à Supabase'}</p>
+      <p>{row.now.toISOString()}</p>
     </main>
   )
 }
