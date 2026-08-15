@@ -1,7 +1,9 @@
+import { connection } from 'next/server'
 import { getProfiles } from '@/lib/profiles'
 import { LoginForm } from './login-form'
 
 export default async function Login() {
+  await connection()
   const profiles = await getProfiles()
 
   return (
