@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { AddExpenseSheet } from '@/components/add-expense-sheet'
 import { deleteExpense } from '@/app/actions/expenses'
 import { dayLabel } from '@/lib/dates'
 import { formatCents } from '@/lib/finance'
@@ -9,10 +10,10 @@ import type { Expense, Profile } from '@/types/db'
 type ExpenseListProps = {
   expenses: Expense[]
   profiles: Profile[]
-  deletable?: boolean
+  currentProfileId: string
 }
 
-export function ExpenseList({ expenses, profiles, deletable = true }: ExpenseListProps) {
+export function ExpenseList({ expenses, profiles, currentProfileId }: ExpenseListProps) {
   if (expenses.length === 0) {
     return <p className="py-12 text-center text-muted">Aucune dépense ce mois-ci</p>
   }
@@ -35,8 +36,8 @@ export function ExpenseList({ expenses, profiles, deletable = true }: ExpenseLis
                 key={expense.id}
                 expense={expense}
                 profiles={profiles}
+                currentProfileId={currentProfileId}
                 separated={index > 0}
-                deletable={deletable}
               />
             ))}
           </div>
@@ -49,15 +50,17 @@ export function ExpenseList({ expenses, profiles, deletable = true }: ExpenseLis
 type ExpenseRowProps = {
   expense: Expense
   profiles: Profile[]
+  currentProfileId: string
   separated: boolean
-  deletable: boolean
 }
 
-function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps) {
+function ExpenseRow({ expense, profiles, currentProfileId, separated }: ExpenseRowProps) {
   const [startX, setStartX] = useState<number | null>(null)
   const [startY, setStartY] = useState(0)
   const [dragX, setDragX] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const swiped = useRef(false)
 
   const payer = profiles.find((profile) => profile.id === expense.paid_by)!
   const other = profiles.find((profile) => profile.id !== expense.paid_by)!
@@ -87,7 +90,7 @@ function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps
         }`}
         style={offset === 0 ? undefined : { transform: `translateX(${offset}px)` }}
         onTouchStart={(event) => {
-          if (!deletable) return
+          swiped.current = false
           setStartX(event.touches[0].clientX)
           setStartY(event.touches[0].clientY)
         }}
@@ -95,6 +98,7 @@ function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps
           if (startX === null) return
           const dx = event.touches[0].clientX - startX
           if (Math.abs(event.touches[0].clientY - startY) > Math.abs(dx)) return
+          if (Math.abs(dx) > 8) swiped.current = true
           setDragX(dx)
         }}
         onTouchEnd={() => {
@@ -102,6 +106,11 @@ function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps
           setRevealed(offset < -44)
           setStartX(null)
           setDragX(0)
+        }}
+        onClick={() => {
+          if (swiped.current) return
+          if (revealed) setRevealed(false)
+          else setEditing(true)
         }}
       >
         <div className="flex flex-col gap-1">
@@ -112,6 +121,14 @@ function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps
         </div>
         <span className="font-medium">{formatCents(expense.amount_cents)}</span>
       </div>
+      {editing && (
+        <AddExpenseSheet
+          onClose={() => setEditing(false)}
+          profiles={profiles}
+          currentProfileId={currentProfileId}
+          expense={expense}
+        />
+      )}
     </div>
   )
 }

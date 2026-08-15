@@ -5,15 +5,16 @@ import { SplitSummary } from '@/components/split-summary'
 import { currentMonthMontreal, monthRange } from '@/lib/dates'
 import { query } from '@/lib/db'
 import { computeMonthSummary } from '@/lib/finance'
-import { getProfiles } from '@/lib/profiles'
+import { getCurrentProfile, getProfiles } from '@/lib/profiles'
 import type { Expense, Settings } from '@/types/db'
 
 export default async function Home() {
   const month = currentMonthMontreal()
   const { start, end } = monthRange(month)
 
-  const [profiles, expenses, settings] = await Promise.all([
+  const [profiles, profile, expenses, settings] = await Promise.all([
     getProfiles(),
+    getCurrentProfile(),
     query<Expense>(
       `select * from expenses
        where date >= $1 and date < $2
@@ -39,7 +40,7 @@ export default async function Home() {
         <BudgetBar totalCents={summary.totalCents} budgetCents={budgetCents} />
       )}
       <SplitSummary profiles={profiles} totals={summary.totals} />
-      <ExpenseList expenses={expenses} profiles={profiles} />
+      <ExpenseList expenses={expenses} profiles={profiles} currentProfileId={profile.id} />
     </main>
   )
 }

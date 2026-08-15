@@ -4,7 +4,7 @@ import { ExpenseList } from '@/components/expense-list'
 import { monthLabel, monthRange } from '@/lib/dates'
 import { query } from '@/lib/db'
 import { computeMonthSummary, formatCents } from '@/lib/finance'
-import { getProfiles } from '@/lib/profiles'
+import { getCurrentProfile, getProfiles } from '@/lib/profiles'
 import type { Expense } from '@/types/db'
 
 export default async function RapportMensuel({ params }: PageProps<'/rapports/[mois]'>) {
@@ -13,8 +13,9 @@ export default async function RapportMensuel({ params }: PageProps<'/rapports/[m
 
   const { start, end } = monthRange(mois)
 
-  const [profiles, expenses] = await Promise.all([
+  const [profiles, profile, expenses] = await Promise.all([
     getProfiles(),
+    getCurrentProfile(),
     query<Expense>(
       `select * from expenses
        where date >= $1 and date < $2
@@ -40,7 +41,7 @@ export default async function RapportMensuel({ params }: PageProps<'/rapports/[m
       <BalanceCard profiles={profiles} summary={summary} />
       <section className="flex flex-col gap-4">
         <h2 className="px-1 text-sm text-muted">Détail des dépenses</h2>
-        <ExpenseList expenses={expenses} profiles={profiles} deletable={false} />
+        <ExpenseList expenses={expenses} profiles={profiles} currentProfileId={profile.id} />
       </section>
     </main>
   )

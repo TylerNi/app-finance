@@ -1,26 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { addExpense } from '@/app/actions/expenses'
+import { addExpense, updateExpense } from '@/app/actions/expenses'
 import { AmountField } from '@/components/ui/amount-field'
 import { Button } from '@/components/ui/button'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Sheet } from '@/components/ui/sheet'
 import { todayMontreal } from '@/lib/dates'
-import type { Profile, Split } from '@/types/db'
+import type { Expense, Profile, Split } from '@/types/db'
 
 type AddExpenseSheetProps = {
   onClose: () => void
   profiles: Profile[]
   currentProfileId: string
+  expense?: Expense
+  defaultDate?: string
 }
 
-export function AddExpenseSheet({ onClose, profiles, currentProfileId }: AddExpenseSheetProps) {
-  const [amountCents, setAmountCents] = useState(0)
-  const [paidBy, setPaidBy] = useState(currentProfileId)
-  const [split, setSplit] = useState<Split>('equal')
-  const [description, setDescription] = useState('')
-  const [date, setDate] = useState(todayMontreal())
+export function AddExpenseSheet({
+  onClose,
+  profiles,
+  currentProfileId,
+  expense,
+  defaultDate,
+}: AddExpenseSheetProps) {
+  const [amountCents, setAmountCents] = useState(expense?.amount_cents ?? 0)
+  const [paidBy, setPaidBy] = useState(expense?.paid_by ?? currentProfileId)
+  const [split, setSplit] = useState<Split>(expense?.split ?? 'equal')
+  const [description, setDescription] = useState(expense?.description ?? '')
+  const [date, setDate] = useState(expense?.date ?? defaultDate ?? todayMontreal())
   const [editingDate, setEditingDate] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,7 +41,9 @@ export function AddExpenseSheet({ onClose, profiles, currentProfileId }: AddExpe
         className="flex flex-col gap-4"
         onSubmit={async (event) => {
           event.preventDefault()
-          const result = await addExpense({ amountCents, paidBy, split, description, date })
+          const result = expense
+            ? await updateExpense({ id: expense.id, amountCents, paidBy, split, description, date })
+            : await addExpense({ amountCents, paidBy, split, description, date })
           if (result.error) setError(result.error)
           else onClose()
         }}

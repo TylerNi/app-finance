@@ -69,11 +69,32 @@ export async function addExpense(input: {
     }
   })
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
+  return {}
+}
+
+export async function updateExpense(input: {
+  id: string
+  amountCents: number
+  paidBy: string
+  split: Split
+  description: string
+  date: string
+}) {
+  if (input.amountCents <= 0) return { error: 'Montant invalide' }
+
+  await query(
+    `update expenses
+     set amount_cents = $1, paid_by = $2, split = $3, description = $4, date = $5
+     where id = $6`,
+    [input.amountCents, input.paidBy, input.split, input.description, input.date, input.id]
+  )
+
+  revalidatePath('/', 'layout')
   return {}
 }
 
 export async function deleteExpense(id: string) {
   await query('delete from expenses where id = $1', [id])
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
 }

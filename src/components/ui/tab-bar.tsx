@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { AddExpenseSheet } from '@/components/add-expense-sheet'
+import { currentMonthMontreal } from '@/lib/dates'
 import type { Profile } from '@/types/db'
 
 const tabs = [
@@ -19,6 +20,9 @@ type TabBarProps = {
 export function TabBar({ profiles, currentProfileId }: TabBarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+
+  const month = pathname.match(/^\/rapports\/(\d{4}-\d{2})$/)?.[1]
+  const defaultDate = month && month !== currentMonthMontreal() ? `${month}-01` : undefined
 
   return (
     <>
@@ -50,6 +54,7 @@ export function TabBar({ profiles, currentProfileId }: TabBarProps) {
           onClose={() => setOpen(false)}
           profiles={profiles}
           currentProfileId={currentProfileId}
+          defaultDate={defaultDate}
         />
       )}
     </>
