@@ -1,5 +1,6 @@
 import { BudgetForm } from '@/components/budget-form'
 import { InstallHint } from '@/components/install-hint'
+import { PushToggle } from '@/components/push-toggle'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/app/login/actions'
 import { query } from '@/lib/db'
@@ -16,6 +17,10 @@ export default async function Reglages() {
       <section className="flex flex-col gap-4">
         <h2 className="text-sm text-muted">Budget mensuel</h2>
         <BudgetForm budgetCents={settings.monthly_budget_cents} />
+      </section>
+      <section className="flex flex-col gap-4">
+        <h2 className="text-sm text-muted">Notifications</h2>
+        <PushToggle />
       </section>
       <form action={signOut}>
         <Button type="submit" variant="danger">
