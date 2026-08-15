@@ -28,11 +28,11 @@ export function AddExpenseSheet({
   const [paidBy, setPaidBy] = useState(expense?.paid_by ?? currentProfileId)
   const [split, setSplit] = useState<Split>(expense?.split ?? 'payer')
   const [description, setDescription] = useState(expense?.description ?? '')
-  const [date, setDate] = useState(expense?.date ?? defaultDate ?? todayMontreal())
-  const [editingDate, setEditingDate] = useState(false)
   const [saving, setSaving] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const date = expense?.date ?? defaultDate ?? todayMontreal()
 
   const payer = profiles.find((profile) => profile.id === paidBy)!
   const other = profiles.find((profile) => profile.id !== paidBy)!
@@ -95,24 +95,6 @@ export function AddExpenseSheet({
           onChange={(event) => setDescription(event.target.value)}
           className="h-12 rounded-control border border-border bg-surface px-4"
         />
-
-        {editingDate ? (
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="h-12 rounded-control border border-border bg-surface px-4"
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setEditingDate(true)}
-            className="flex h-12 items-center justify-between px-1"
-          >
-            <span>{date === todayMontreal() ? "Aujourd'hui" : date}</span>
-            <span className="text-muted">›</span>
-          </button>
-        )}
 
         {error && <p className="text-center text-sm text-danger">{error}</p>}
 
