@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { SwRegister } from '@/components/sw-register'
 import './globals.css'
 
 export const viewport: Viewport = {
@@ -13,13 +14,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'Finances',
+  manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'Finances', statusBarStyle: 'default' },
+  icons: { apple: '/icons/apple-touch-icon.png' },
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="fr-CA">
-      <body>{children}</body>
+      <body>
+        {children}
+        <SwRegister />
+      </body>
     </html>
   )
 }

@@ -1,4 +1,5 @@
 import { BudgetForm } from '@/components/budget-form'
+import { InstallHint } from '@/components/install-hint'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/app/login/actions'
 import { query } from '@/lib/db'
@@ -21,6 +22,7 @@ export default async function Reglages() {
           Se déconnecter
         </Button>
       </form>
+      <InstallHint />
     </main>
   )
 }
