@@ -55,6 +55,15 @@ export function computeMonthSummary(expenses: Expense[], profileIds: string[]): 
   }
 }
 
+export function crossesBudget(
+  beforeCents: number,
+  afterCents: number,
+  budgetCents: number | null
+): boolean {
+  if (budgetCents === null) return false
+  return beforeCents < budgetCents && afterCents >= budgetCents
+}
+
 export function formatCents(cents: number): string {
   return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(cents / 100)
 }
