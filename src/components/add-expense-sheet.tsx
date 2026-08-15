@@ -26,7 +26,7 @@ export function AddExpenseSheet({
 }: AddExpenseSheetProps) {
   const [amountCents, setAmountCents] = useState(expense?.amount_cents ?? 0)
   const [paidBy, setPaidBy] = useState(expense?.paid_by ?? currentProfileId)
-  const [split, setSplit] = useState<Split>(expense?.split ?? 'equal')
+  const [split, setSplit] = useState<Split>(expense?.split ?? 'payer')
   const [description, setDescription] = useState(expense?.description ?? '')
   const [date, setDate] = useState(expense?.date ?? defaultDate ?? todayMontreal())
   const [editingDate, setEditingDate] = useState(false)

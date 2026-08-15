@@ -22,7 +22,7 @@ export function SubscriptionSheet({
   subscription,
 }: SubscriptionSheetProps) {
   const [amountCents, setAmountCents] = useState(subscription?.amount_cents ?? 0)
-  const [split, setSplit] = useState<Split>(subscription?.split ?? 'equal')
+  const [split, setSplit] = useState<Split>(subscription?.split ?? 'payer')
   const [description, setDescription] = useState(subscription?.description ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
