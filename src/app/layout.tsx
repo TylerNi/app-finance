@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { TabBar } from '@/components/ui/tab-bar'
 import './globals.css'
 
 export const viewport: Viewport = {
@@ -20,10 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="fr-CA">
-      <body>
-        {children}
-        <TabBar />
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
