@@ -4,9 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { after } from 'next/server'
 import { monthRange } from '@/lib/dates'
 import { query } from '@/lib/db'
+import { queueExpenseNotice } from '@/lib/expense-notice'
 import { computeMonthSummary, crossesBudget, formatCents } from '@/lib/finance'
 import { getCurrentProfile, getOtherProfile } from '@/lib/profiles'
-import { sendToAll, sendToUser } from '@/lib/push'
+import { sendToAll } from '@/lib/push'
 import type { Expense, Settings, Split } from '@/types/db'
 
 export async function addExpense(input: {
@@ -56,13 +57,15 @@ export async function addExpense(input: {
     )
   )
 
-  after(async () => {
-    await sendToUser(other.id, {
-      title: `${profile.name} a ajouté une dépense`,
-      body: `${formatCents(input.amountCents)} · ${input.description || 'Dépense'}`,
-      url: '/',
-    })
+  queueExpenseNotice({
+    senderId: profile.id,
+    senderName: profile.name,
+    recipientId: other.id,
+    amountCents: input.amountCents,
+    description: input.description,
+  })
 
+  after(async () => {
     for (const entry of crossed) {
       const month = `${input.date.slice(0, 7)}-01`
       const claimed = await query(
