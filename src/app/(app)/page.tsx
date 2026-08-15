@@ -41,7 +41,7 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
     <main className="flex flex-col gap-6 p-4">
       <MonthHeader month={month} totalCents={summary.totalCents} />
       {budgetCents !== null && (
-        <BudgetBar totalCents={summary.totalCents} budgetCents={budgetCents} />
+        <BudgetBar profiles={profiles} totals={summary.totals} budgetCents={budgetCents} />
       )}
       <SplitSummary profiles={profiles} totals={summary.totals} />
       <ExpenseList expenses={expenses} profiles={profiles} currentProfileId={profile.id} />

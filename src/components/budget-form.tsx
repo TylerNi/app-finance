@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 
 export function BudgetForm({ budgetCents }: { budgetCents: number | null }) {
   const [amountCents, setAmountCents] = useState(budgetCents ?? 0)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   return (
@@ -14,7 +15,9 @@ export function BudgetForm({ budgetCents }: { budgetCents: number | null }) {
       className="flex flex-col gap-4"
       onSubmit={async (event) => {
         event.preventDefault()
+        setSaving(true)
         const result = await setMonthlyBudget(amountCents)
+        setSaving(false)
         if (result.error) setError(result.error)
       }}
     >
@@ -26,7 +29,9 @@ export function BudgetForm({ budgetCents }: { budgetCents: number | null }) {
         }}
       />
       {error && <p className="text-center text-sm text-danger">{error}</p>}
-      <Button type="submit">Enregistrer</Button>
+      <Button type="submit" disabled={saving}>
+        {saving ? 'Enregistrement…' : 'Enregistrer'}
+      </Button>
       <Button
         type="button"
         variant="ghost"

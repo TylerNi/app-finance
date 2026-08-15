@@ -46,7 +46,7 @@ export function TabBar({ profiles, currentProfileId }: TabBarProps) {
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Ajouter une dépense"
-            className="absolute -top-4 left-1/2 h-14 w-14 -translate-x-1/2 rounded-full bg-accent text-3xl text-white"
+            className="absolute -top-4 left-1/2 h-14 w-14 -translate-x-1/2 rounded-full bg-accent text-3xl text-white transition-opacity active:opacity-70"
           >
             +
           </button>

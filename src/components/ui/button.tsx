@@ -13,7 +13,7 @@ type ButtonProps = ComponentProps<'button'> & {
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
   return (
     <button
-      className={`h-12 w-full rounded-control text-base font-medium ${variants[variant]} ${className}`}
+      className={`h-12 w-full rounded-control text-base font-medium transition-opacity active:opacity-70 disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     />
   )

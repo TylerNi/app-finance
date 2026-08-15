@@ -3,6 +3,7 @@ import { query } from '@/lib/db'
 import { computeMonthSummary, formatCents } from '@/lib/finance'
 import { getProfiles } from '@/lib/profiles'
 import { sendToAll } from '@/lib/push'
+import { chargeSubscriptions } from '@/lib/subscriptions'
 import type { Expense, Profile, Settings } from '@/types/db'
 
 function previousMonth(today: string): string {
@@ -86,7 +87,11 @@ export async function POST(request: Request) {
   const profiles = await getProfiles()
   const results: string[] = []
 
-  if (today.endsWith('-01')) results.push(await sendMonthlyReport(profiles, today))
+  if (today.endsWith('-01')) {
+    const charged = await chargeSubscriptions(today.slice(0, 7))
+    results.push(`${charged} abonnement(s) facturé(s)`)
+    results.push(await sendMonthlyReport(profiles, today))
+  }
   results.push(await sendInactivityReminder(today))
 
   return Response.json({ today, profiles: profiles.map((profile) => profile.name), results })

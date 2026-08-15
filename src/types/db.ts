@@ -16,6 +16,14 @@ export type Expense = {
   created_at: Date
 }
 
+export type Subscription = {
+  id: string
+  profile_id: string
+  amount_cents: number
+  description: string
+  split: Split
+}
+
 export type Settings = {
   id: number
   monthly_budget_cents: number | null

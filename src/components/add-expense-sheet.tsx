@@ -30,6 +30,7 @@ export function AddExpenseSheet({
   const [description, setDescription] = useState(expense?.description ?? '')
   const [date, setDate] = useState(expense?.date ?? defaultDate ?? todayMontreal())
   const [editingDate, setEditingDate] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const payer = profiles.find((profile) => profile.id === paidBy)!
@@ -41,15 +42,17 @@ export function AddExpenseSheet({
         className="flex flex-col gap-4"
         onSubmit={async (event) => {
           event.preventDefault()
+          setSaving(true)
           const result = expense
             ? await updateExpense({ id: expense.id, amountCents, paidBy, split, description, date })
             : await addExpense({ amountCents, paidBy, split, description, date })
+          setSaving(false)
           if (result.error) setError(result.error)
           else onClose()
         }}
       >
         <div className="flex justify-end">
-          <button type="button" onClick={onClose} className="text-accent">
+          <button type="button" onClick={onClose} className="text-accent active:opacity-70">
             Annuler
           </button>
         </div>
@@ -112,7 +115,9 @@ export function AddExpenseSheet({
 
         {error && <p className="text-center text-sm text-danger">{error}</p>}
 
-        <Button type="submit">Enregistrer</Button>
+        <Button type="submit" disabled={saving}>
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
+        </Button>
       </form>
     </Sheet>
   )

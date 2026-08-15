@@ -4,10 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { after } from 'next/server'
 import { monthRange } from '@/lib/dates'
 import { query } from '@/lib/db'
-import { crossesBudget, formatCents } from '@/lib/finance'
+import { computeMonthSummary, crossesBudget, formatCents } from '@/lib/finance'
 import { getCurrentProfile, getOtherProfile } from '@/lib/profiles'
 import { sendToAll, sendToUser } from '@/lib/push'
-import type { Settings, Split } from '@/types/db'
+import type { Expense, Settings, Split } from '@/types/db'
 
 export async function addExpense(input: {
   amountCents: number
@@ -20,17 +20,18 @@ export async function addExpense(input: {
 
   const profile = await getCurrentProfile()
 
-  await query(
+  const [inserted] = await query<{ id: string }>(
     `insert into expenses (amount_cents, paid_by, split, description, date, created_by)
-     values ($1, $2, $3, $4, $5, $6)`,
+     values ($1, $2, $3, $4, $5, $6)
+     returning id`,
     [input.amountCents, input.paidBy, input.split, input.description, input.date, profile.id]
   )
 
   const { start, end } = monthRange(input.date.slice(0, 7))
 
-  const [[total], [settings]] = await Promise.all([
-    query<{ total_cents: number }>(
-      `select coalesce(sum(amount_cents), 0)::int as total_cents from expenses
+  const [expenses, [settings]] = await Promise.all([
+    query<Expense>(
+      `select * from expenses
        where date >= $1 and date < $2`,
       [start, end]
     ),
@@ -39,10 +40,21 @@ export async function addExpense(input: {
     ),
   ])
 
-  const totalAfter = total.total_cents
-  const totalBefore = totalAfter - input.amountCents
-  const budgetCrossed = crossesBudget(totalBefore, totalAfter, settings.monthly_budget_cents)
   const other = await getOtherProfile(profile.id)
+  const profileIds = [profile.id, other.id]
+
+  const summaryAfter = computeMonthSummary(expenses, profileIds)
+  const summaryBefore = computeMonthSummary(
+    expenses.filter((expense) => expense.id !== inserted.id),
+    profileIds
+  )
+  const crossed = [profile, other].filter((entry) =>
+    crossesBudget(
+      summaryBefore.totals[entry.id].shareCents,
+      summaryAfter.totals[entry.id].shareCents,
+      settings.monthly_budget_cents
+    )
+  )
 
   after(async () => {
     await sendToUser(other.id, {
@@ -51,18 +63,19 @@ export async function addExpense(input: {
       url: '/',
     })
 
-    if (budgetCrossed) {
+    for (const entry of crossed) {
       const month = `${input.date.slice(0, 7)}-01`
       const claimed = await query(
-        'insert into budget_alerts (month) values ($1) on conflict do nothing returning month',
-        [month]
+        `insert into budget_alerts (month, profile_id) values ($1, $2)
+         on conflict do nothing returning month`,
+        [month, entry.id]
       )
       if (claimed.length > 0) {
         await sendToAll({
-          title: 'Budget mensuel dépassé',
-          body: `${formatCents(totalAfter)} dépensés sur un budget de ${formatCents(
-            settings.monthly_budget_cents!
-          )}`,
+          title: `${entry.name} a dépassé son budget mensuel`,
+          body: `${formatCents(
+            summaryAfter.totals[entry.id].shareCents
+          )} sur un budget de ${formatCents(settings.monthly_budget_cents!)}`,
           url: '/',
         })
       }
