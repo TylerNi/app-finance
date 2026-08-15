@@ -30,13 +30,15 @@ export function TabBar({ profiles, currentProfileId }: TabBarProps) {
   return (
     <>
       <nav className="fixed inset-x-0 bottom-0 z-40 h-[calc(60px+env(safe-area-inset-bottom))] border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
-        <div className="relative flex h-[60px] items-center">
+        <div className="relative flex h-[60px] items-center gap-20 px-4">
           {tabs.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex h-full flex-1 items-center justify-center text-xs ${
-                pathname === tab.href ? 'text-accent' : 'text-muted'
+              className={`flex h-10 flex-1 items-center justify-center rounded-control text-sm transition-opacity active:opacity-70 ${
+                pathname === tab.href || (tab.href !== '/' && pathname.startsWith(tab.href))
+                  ? 'bg-accent text-white'
+                  : 'bg-border text-text'
               }`}
             >
               {tab.label}

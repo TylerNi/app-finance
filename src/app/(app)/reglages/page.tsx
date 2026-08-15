@@ -2,6 +2,7 @@ import { BudgetForm } from '@/components/budget-form'
 import { InstallHint } from '@/components/install-hint'
 import { PushToggle } from '@/components/push-toggle'
 import { SubscriptionList } from '@/components/subscription-list'
+import { BackLink } from '@/components/ui/back-link'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/app/login/actions'
 import { query } from '@/lib/db'
@@ -21,7 +22,10 @@ export default async function Reglages() {
 
   return (
     <main className="flex flex-col gap-6 p-4">
-      <h1 className="text-2xl font-semibold">Réglages</h1>
+      <div className="flex items-center gap-1">
+        <BackLink href="/" />
+        <h1 className="text-2xl font-semibold">Réglages</h1>
+      </div>
       <section className="flex flex-col gap-4">
         <h2 className="text-sm text-muted">Budget mensuel par personne</h2>
         <BudgetForm budgetCents={settings.monthly_budget_cents} />

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BackLink } from '@/components/ui/back-link'
 import { currentMonthMontreal, monthLabel } from '@/lib/dates'
 import { query } from '@/lib/db'
 import { formatCents } from '@/lib/finance'
@@ -19,7 +20,10 @@ export default async function Rapports() {
 
   return (
     <main className="flex flex-col gap-6 p-4">
-      <h1 className="text-2xl font-semibold">Rapports</h1>
+      <div className="flex items-center gap-1">
+        <BackLink href="/" />
+        <h1 className="text-2xl font-semibold">Rapports</h1>
+      </div>
       <div className="overflow-hidden rounded-card bg-surface">
         {entries.map((entry, index) => {
           const label = monthLabel(entry.month)
