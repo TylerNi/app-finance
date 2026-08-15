@@ -9,9 +9,10 @@ import type { Expense, Profile } from '@/types/db'
 type ExpenseListProps = {
   expenses: Expense[]
   profiles: Profile[]
+  deletable?: boolean
 }
 
-export function ExpenseList({ expenses, profiles }: ExpenseListProps) {
+export function ExpenseList({ expenses, profiles, deletable = true }: ExpenseListProps) {
   if (expenses.length === 0) {
     return <p className="py-12 text-center text-muted">Aucune dépense ce mois-ci</p>
   }
@@ -35,6 +36,7 @@ export function ExpenseList({ expenses, profiles }: ExpenseListProps) {
                 expense={expense}
                 profiles={profiles}
                 separated={index > 0}
+                deletable={deletable}
               />
             ))}
           </div>
@@ -48,9 +50,10 @@ type ExpenseRowProps = {
   expense: Expense
   profiles: Profile[]
   separated: boolean
+  deletable: boolean
 }
 
-function ExpenseRow({ expense, profiles, separated }: ExpenseRowProps) {
+function ExpenseRow({ expense, profiles, separated, deletable }: ExpenseRowProps) {
   const [startX, setStartX] = useState<number | null>(null)
   const [startY, setStartY] = useState(0)
   const [dragX, setDragX] = useState(0)
@@ -84,6 +87,7 @@ function ExpenseRow({ expense, profiles, separated }: ExpenseRowProps) {
         }`}
         style={offset === 0 ? undefined : { transform: `translateX(${offset}px)` }}
         onTouchStart={(event) => {
+          if (!deletable) return
           setStartX(event.touches[0].clientX)
           setStartY(event.touches[0].clientY)
         }}
@@ -94,6 +98,7 @@ function ExpenseRow({ expense, profiles, separated }: ExpenseRowProps) {
           setDragX(dx)
         }}
         onTouchEnd={() => {
+          if (startX === null) return
           setRevealed(offset < -44)
           setStartX(null)
           setDragX(0)
