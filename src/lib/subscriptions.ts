@@ -14,9 +14,10 @@ export async function chargeSubscription(
   )
   if (claimed.length === 0) return false
 
-  await query(
+  const [expense] = await query<{ id: string }>(
     `insert into expenses (amount_cents, paid_by, split, description, date, created_by)
-     values ($1, $2, $3, $4, $5, $2)`,
+     values ($1, $2, $3, $4, $5, $2)
+     returning id`,
     [
       subscription.amount_cents,
       subscription.profile_id,
@@ -24,6 +25,11 @@ export async function chargeSubscription(
       subscription.description,
       date,
     ]
+  )
+
+  await query(
+    'update subscription_charges set expense_id = $1 where subscription_id = $2 and month = $3',
+    [expense.id, subscription.id, date]
   )
 
   return true

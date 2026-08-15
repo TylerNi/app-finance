@@ -42,11 +42,31 @@ export async function updateSubscription(input: {
     [input.amountCents, input.split, input.description, input.id]
   )
 
-  revalidatePath('/reglages')
+  await query(
+    `update expenses
+     set amount_cents = $1, split = $2, description = $3
+     where id = (select expense_id from subscription_charges
+                 where subscription_id = $4 and month = $5)`,
+    [
+      input.amountCents,
+      input.split,
+      input.description,
+      input.id,
+      `${currentMonthMontreal()}-01`,
+    ]
+  )
+
+  revalidatePath('/', 'layout')
   return {}
 }
 
 export async function deleteSubscription(id: string) {
+  await query(
+    `delete from expenses
+     where id = (select expense_id from subscription_charges
+                 where subscription_id = $1 and month = $2)`,
+    [id, `${currentMonthMontreal()}-01`]
+  )
   await query('delete from subscriptions where id = $1', [id])
-  revalidatePath('/reglages')
+  revalidatePath('/', 'layout')
 }
