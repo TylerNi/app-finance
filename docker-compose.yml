@@ -16,5 +16,14 @@ services:
       timeout: 5s
       retries: 10
 
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+      CRON_TARGET: ${CRON_TARGET:-http://app:3000/api/cron/daily}
+
 volumes:
   postgres-data:

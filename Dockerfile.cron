@@ -1,0 +1,12 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache curl tzdata \
+ && cp /usr/share/zoneinfo/America/Montreal /etc/localtime \
+ && echo "America/Montreal" > /etc/timezone
+
+ENV TZ=America/Montreal
+
+COPY docker/cron-entrypoint.sh /usr/local/bin/cron-entrypoint.sh
+RUN chmod +x /usr/local/bin/cron-entrypoint.sh
+
+CMD ["/usr/local/bin/cron-entrypoint.sh"]
