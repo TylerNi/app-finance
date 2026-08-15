@@ -25,3 +25,8 @@ export async function addExpense(input: {
   revalidatePath('/')
   return {}
 }
+
+export async function deleteExpense(id: string) {
+  await query('delete from expenses where id = $1', [id])
+  revalidatePath('/')
+}

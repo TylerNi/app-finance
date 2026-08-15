@@ -15,6 +15,23 @@ export function monthRange(month: string): { start: string; end: string } {
   return { start, end }
 }
 
+export function dayLabel(date: string): string {
+  const today = todayMontreal()
+  if (date === today) return "Aujourd'hui"
+
+  const [ty, tm, td] = today.split('-').map(Number)
+  const yesterday = new Date(Date.UTC(ty, tm - 1, td - 1)).toISOString().slice(0, 10)
+  if (date === yesterday) return 'Hier'
+
+  const [y, m, d] = date.split('-').map(Number)
+  return new Intl.DateTimeFormat('fr-CA', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(y, m - 1, d)))
+}
+
 export function monthLabel(month: string): string {
   const [y, m] = month.split('-').map(Number)
   return new Intl.DateTimeFormat('fr-CA', { month: 'long', year: 'numeric', timeZone: 'UTC' })
