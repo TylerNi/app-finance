@@ -15,6 +15,12 @@ export function monthRange(month: string): { start: string; end: string } {
   return { start, end }
 }
 
+export function shiftMonth(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number)
+  const total = y * 12 + (m - 1) + delta
+  return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`
+}
+
 export function dayLabel(date: string): string {
   const today = todayMontreal()
   if (date === today) return "Aujourd'hui"

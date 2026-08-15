@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { AddExpenseSheet } from '@/components/add-expense-sheet'
 import { currentMonthMontreal } from '@/lib/dates'
@@ -20,8 +20,11 @@ type TabBarProps = {
 export function TabBar({ profiles, currentProfileId }: TabBarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  const month = pathname.match(/^\/rapports\/(\d{4}-\d{2})$/)?.[1]
+  const viewed =
+    pathname === '/' ? searchParams.get('mois') : pathname.match(/^\/rapports\/(.+)$/)?.[1]
+  const month = viewed && /^\d{4}-(0[1-9]|1[0-2])$/.test(viewed) ? viewed : undefined
   const defaultDate = month && month !== currentMonthMontreal() ? `${month}-01` : undefined
 
   return (

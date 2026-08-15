@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { monthLabel } from '@/lib/dates'
+import { currentMonthMontreal, monthLabel, shiftMonth } from '@/lib/dates'
 import { formatCents } from '@/lib/finance'
 
 type MonthHeaderProps = {
@@ -19,9 +19,27 @@ export function MonthHeader({ month, totalCents }: MonthHeaderProps) {
       >
         ⚙
       </Link>
-      <p className="text-muted">{label.charAt(0).toUpperCase() + label.slice(1)}</p>
+      <div className="flex items-center gap-4">
+        <Link
+          href={`/?mois=${shiftMonth(month, -1)}`}
+          aria-label="Mois précédent"
+          className="px-2 text-muted"
+        >
+          ‹
+        </Link>
+        <p className="text-muted">{label.charAt(0).toUpperCase() + label.slice(1)}</p>
+        <Link
+          href={`/?mois=${shiftMonth(month, 1)}`}
+          aria-label="Mois suivant"
+          className="px-2 text-muted"
+        >
+          ›
+        </Link>
+      </div>
       <p className="text-5xl font-semibold">{formatCents(totalCents)}</p>
-      <p className="text-sm text-muted">dépensé ce mois-ci</p>
+      <p className="text-sm text-muted">
+        {month === currentMonthMontreal() ? 'dépensé ce mois-ci' : 'dépensé'}
+      </p>
     </header>
   )
 }

@@ -8,8 +8,12 @@ import { computeMonthSummary } from '@/lib/finance'
 import { getCurrentProfile, getProfiles } from '@/lib/profiles'
 import type { Expense, Settings } from '@/types/db'
 
-export default async function Home() {
-  const month = currentMonthMontreal()
+export default async function Home({ searchParams }: PageProps<'/'>) {
+  const { mois } = await searchParams
+  const month =
+    typeof mois === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(mois)
+      ? mois
+      : currentMonthMontreal()
   const { start, end } = monthRange(month)
 
   const [profiles, profile, expenses, settings] = await Promise.all([

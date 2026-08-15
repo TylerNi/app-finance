@@ -12,37 +12,37 @@ export default async function Rapports() {
   )
 
   const current = currentMonthMontreal()
+  const entries = [
+    months.find((entry) => entry.month === current) ?? { month: current, total_cents: 0 },
+    ...months.filter((entry) => entry.month !== current),
+  ]
 
   return (
     <main className="flex flex-col gap-6 p-4">
       <h1 className="text-2xl font-semibold">Rapports</h1>
-      {months.length === 0 ? (
-        <p className="py-12 text-center text-muted">Aucune dépense enregistrée</p>
-      ) : (
-        <div className="overflow-hidden rounded-card bg-surface">
-          {months.map((entry, index) => {
-            const label = monthLabel(entry.month)
-            return (
-              <Link
-                key={entry.month}
-                href={`/rapports/${entry.month}`}
-                className={`flex items-baseline justify-between p-4 ${
-                  index > 0 ? 'border-t border-border' : ''
-                }`}
-              >
-                <span className="flex items-baseline gap-2">
-                  {label.charAt(0).toUpperCase() + label.slice(1)}
-                  {entry.month === current && <span className="text-sm text-muted">en cours</span>}
-                </span>
-                <span className="flex items-baseline gap-2">
-                  <span className="font-medium">{formatCents(entry.total_cents)}</span>
-                  <span className="text-muted">›</span>
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+      <div className="overflow-hidden rounded-card bg-surface">
+        {entries.map((entry, index) => {
+          const label = monthLabel(entry.month)
+          return (
+            <Link
+              key={entry.month}
+              href={`/rapports/${entry.month}`}
+              className={`flex items-baseline justify-between p-4 ${
+                index > 0 ? 'border-t border-border' : ''
+              }`}
+            >
+              <span className="flex items-baseline gap-2">
+                {label.charAt(0).toUpperCase() + label.slice(1)}
+                {entry.month === current && <span className="text-sm text-muted">en cours</span>}
+              </span>
+              <span className="flex items-baseline gap-2">
+                <span className="font-medium">{formatCents(entry.total_cents)}</span>
+                <span className="text-muted">›</span>
+              </span>
+            </Link>
+          )
+        })}
+      </div>
     </main>
   )
 }
