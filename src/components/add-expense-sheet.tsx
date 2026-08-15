@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { addExpense, updateExpense } from '@/app/actions/expenses'
+import { addExpense, deleteExpense, updateExpense } from '@/app/actions/expenses'
 import { AmountField } from '@/components/ui/amount-field'
 import { Button } from '@/components/ui/button'
 import { SegmentedControl } from '@/components/ui/segmented-control'
@@ -31,6 +31,7 @@ export function AddExpenseSheet({
   const [date, setDate] = useState(expense?.date ?? defaultDate ?? todayMontreal())
   const [editingDate, setEditingDate] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const payer = profiles.find((profile) => profile.id === paidBy)!
@@ -118,6 +119,30 @@ export function AddExpenseSheet({
         <Button type="submit" disabled={saving}>
           {saving ? 'Enregistrement…' : 'Enregistrer'}
         </Button>
+
+        {expense &&
+          (confirmingDelete ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-sm text-muted">Supprimer cette dépense ?</p>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={async () => {
+                  await deleteExpense(expense.id)
+                  onClose()
+                }}
+              >
+                Supprimer
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setConfirmingDelete(false)}>
+                Annuler
+              </Button>
+            </div>
+          ) : (
+            <Button type="button" variant="danger" onClick={() => setConfirmingDelete(true)}>
+              Supprimer
+            </Button>
+          ))}
       </form>
     </Sheet>
   )
