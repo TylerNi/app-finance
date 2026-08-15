@@ -27,6 +27,25 @@ export async function addSubscription(input: {
   return {}
 }
 
+export async function updateSubscription(input: {
+  id: string
+  amountCents: number
+  split: Split
+  description: string
+}) {
+  if (input.amountCents <= 0) return { error: 'Montant invalide' }
+
+  await query(
+    `update subscriptions
+     set amount_cents = $1, split = $2, description = $3
+     where id = $4`,
+    [input.amountCents, input.split, input.description, input.id]
+  )
+
+  revalidatePath('/reglages')
+  return {}
+}
+
 export async function deleteSubscription(id: string) {
   await query('delete from subscriptions where id = $1', [id])
   revalidatePath('/reglages')

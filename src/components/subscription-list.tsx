@@ -12,7 +12,7 @@ type SubscriptionListProps = {
 }
 
 export function SubscriptionList({ profiles, subscriptions }: SubscriptionListProps) {
-  const [adding, setAdding] = useState<Profile | null>(null)
+  const [sheet, setSheet] = useState<{ profile: Profile; subscription?: Subscription } | null>(null)
 
   return (
     <div className="flex flex-col gap-4">
@@ -31,7 +31,11 @@ export function SubscriptionList({ profiles, subscriptions }: SubscriptionListPr
                     index > 0 ? 'border-t border-border' : ''
                   }`}
                 >
-                  <div className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSheet({ profile, subscription })}
+                    className="flex flex-1 flex-col items-start gap-1 text-left active:opacity-70"
+                  >
                     <span>{subscription.description}</span>
                     <span className="text-sm text-muted">
                       {subscription.split === 'equal'
@@ -40,7 +44,7 @@ export function SubscriptionList({ profiles, subscriptions }: SubscriptionListPr
                           ? `100 % ${profile.name}`
                           : `100 % ${other.name}`}
                     </span>
-                  </div>
+                  </button>
                   <span className="flex items-baseline gap-4">
                     <span className="font-medium">{formatCents(subscription.amount_cents)}</span>
                     <button
@@ -56,7 +60,7 @@ export function SubscriptionList({ profiles, subscriptions }: SubscriptionListPr
               ))}
               <button
                 type="button"
-                onClick={() => setAdding(profile)}
+                onClick={() => setSheet({ profile })}
                 className={`w-full p-4 text-left text-accent active:opacity-70 ${
                   mine.length > 0 ? 'border-t border-border' : ''
                 }`}
@@ -67,11 +71,12 @@ export function SubscriptionList({ profiles, subscriptions }: SubscriptionListPr
           </div>
         )
       })}
-      {adding && (
+      {sheet && (
         <SubscriptionSheet
-          onClose={() => setAdding(null)}
-          profile={adding}
-          other={profiles.find((entry) => entry.id !== adding.id)!}
+          onClose={() => setSheet(null)}
+          profile={sheet.profile}
+          other={profiles.find((entry) => entry.id !== sheet.profile.id)!}
+          subscription={sheet.subscription}
         />
       )}
     </div>

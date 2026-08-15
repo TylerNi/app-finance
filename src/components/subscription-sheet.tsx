@@ -1,23 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { addSubscription } from '@/app/actions/subscriptions'
+import { addSubscription, updateSubscription } from '@/app/actions/subscriptions'
 import { AmountField } from '@/components/ui/amount-field'
 import { Button } from '@/components/ui/button'
 import { SegmentedControl } from '@/components/ui/segmented-control'
 import { Sheet } from '@/components/ui/sheet'
-import type { Profile, Split } from '@/types/db'
+import type { Profile, Split, Subscription } from '@/types/db'
 
 type SubscriptionSheetProps = {
   onClose: () => void
   profile: Profile
   other: Profile
+  subscription?: Subscription
 }
 
-export function SubscriptionSheet({ onClose, profile, other }: SubscriptionSheetProps) {
-  const [amountCents, setAmountCents] = useState(0)
-  const [split, setSplit] = useState<Split>('equal')
-  const [description, setDescription] = useState('')
+export function SubscriptionSheet({
+  onClose,
+  profile,
+  other,
+  subscription,
+}: SubscriptionSheetProps) {
+  const [amountCents, setAmountCents] = useState(subscription?.amount_cents ?? 0)
+  const [split, setSplit] = useState<Split>(subscription?.split ?? 'equal')
+  const [description, setDescription] = useState(subscription?.description ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,12 +34,9 @@ export function SubscriptionSheet({ onClose, profile, other }: SubscriptionSheet
         onSubmit={async (event) => {
           event.preventDefault()
           setSaving(true)
-          const result = await addSubscription({
-            profileId: profile.id,
-            amountCents,
-            split,
-            description,
-          })
+          const result = subscription
+            ? await updateSubscription({ id: subscription.id, amountCents, split, description })
+            : await addSubscription({ profileId: profile.id, amountCents, split, description })
           setSaving(false)
           if (result.error) setError(result.error)
           else onClose()
