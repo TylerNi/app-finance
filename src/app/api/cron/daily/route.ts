@@ -1,8 +1,9 @@
-import { monthLabel, monthRange, todayMontreal } from '@/lib/dates'
+import { monthLabel, monthRange, shiftMonth, todayMontreal } from '@/lib/dates'
 import { query } from '@/lib/db'
 import { computeMonthSummary, formatCents } from '@/lib/finance'
 import { getProfiles } from '@/lib/profiles'
 import { sendToAll } from '@/lib/push'
+import { monthBalance } from '@/lib/settlements'
 import { chargeSubscriptions } from '@/lib/subscriptions'
 import type { Expense, Profile, Settings } from '@/types/db'
 
@@ -48,6 +49,44 @@ async function sendMonthlyReport(profiles: Profile[], today: string): Promise<st
   return `${title} — ${body}`
 }
 
+async function sendOverdueReminders(today: string): Promise<string> {
+  const limit = `${shiftMonth(today.slice(0, 7), -1)}-01`
+
+  const months = await query<{ month: string }>(
+    `select to_char(e.date, 'YYYY-MM') as month
+     from expenses e
+     left join monthly_settlements s on s.month = date_trunc('month', e.date)::date
+     where e.date < $1 and s.month is null
+     group by 1
+     order by 1`,
+    [limit]
+  )
+  if (months.length === 0) return 'aucun mois en retard'
+
+  const claimed = await query(
+    `insert into job_runs (job, day) values ('overdue_reminder', $1)
+     on conflict do nothing returning day`,
+    [today]
+  )
+  if (claimed.length === 0) return 'relances déjà envoyées'
+
+  const sent: string[] = []
+  for (const entry of months) {
+    const { creditor, owedCents } = await monthBalance(entry.month)
+    if (!creditor) continue
+
+    const label = monthLabel(entry.month)
+    await sendToAll({
+      title: `${label.charAt(0).toUpperCase() + label.slice(1)} toujours impayé`,
+      body: `${formatCents(owedCents)} dus à ${creditor.name} depuis plus d'un mois`,
+      url: `/rapports/${entry.month}`,
+    })
+    sent.push(entry.month)
+  }
+
+  return sent.length > 0 ? `relance envoyée pour ${sent.join(', ')}` : 'aucun solde à relancer'
+}
+
 async function sendInactivityReminder(today: string): Promise<string> {
   const [[settings], [last]] = await Promise.all([
     query<Pick<Settings, 'inactivity_reminder_days'>>(
@@ -91,6 +130,7 @@ export async function POST(request: Request) {
     const charged = await chargeSubscriptions(today.slice(0, 7))
     results.push(`${charged} abonnement(s) facturé(s)`)
     results.push(await sendMonthlyReport(profiles, today))
+    results.push(await sendOverdueReminders(today))
   }
   results.push(await sendInactivityReminder(today))
 

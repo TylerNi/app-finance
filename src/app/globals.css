@@ -9,6 +9,7 @@
   --color-accent: #0a84ff;
   --color-danger: #ff3b30;
   --color-success: #34c759;
+  --color-warning: #ffcc00;
 
   --radius-card: 16px;
   --radius-control: 12px;
@@ -35,6 +36,7 @@
     --color-accent: #0a84ff;
     --color-danger: #ff453a;
     --color-success: #30d158;
+    --color-warning: #ffd60a;
   }
 }
 

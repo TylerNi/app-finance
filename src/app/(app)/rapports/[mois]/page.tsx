@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { BalanceCard } from '@/components/balance-card'
 import { ExpenseList } from '@/components/expense-list'
+import { SettlementActions } from '@/components/settlement-actions'
 import { BackLink } from '@/components/ui/back-link'
 import { monthLabel, monthRange } from '@/lib/dates'
 import { query } from '@/lib/db'
@@ -14,7 +15,7 @@ export default async function RapportMensuel({ params }: PageProps<'/rapports/[m
 
   const { start, end } = monthRange(mois)
 
-  const [profiles, profile, expenses] = await Promise.all([
+  const [profiles, profile, expenses, settlements] = await Promise.all([
     getProfiles(),
     getCurrentProfile(),
     query<Expense>(
@@ -23,6 +24,7 @@ export default async function RapportMensuel({ params }: PageProps<'/rapports/[m
        order by date desc, created_at desc`,
       [start, end]
     ),
+    query<{ month: string }>('select month from monthly_settlements where month = $1', [start]),
   ])
 
   const summary = computeMonthSummary(
@@ -45,6 +47,11 @@ export default async function RapportMensuel({ params }: PageProps<'/rapports/[m
         <h2 className="px-1 text-sm text-muted">Détail des dépenses</h2>
         <ExpenseList expenses={expenses} profiles={profiles} currentProfileId={profile.id} />
       </section>
+      <SettlementActions
+        month={mois}
+        settled={settlements.length > 0}
+        canRemind={summary.debtorId !== null && summary.debtorId !== profile.id}
+      />
     </main>
   )
 }
