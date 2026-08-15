@@ -10,18 +10,12 @@ import { todayMontreal } from '@/lib/dates'
 import type { Profile, Split } from '@/types/db'
 
 type AddExpenseSheetProps = {
-  open: boolean
   onClose: () => void
   profiles: Profile[]
   currentProfileId: string
 }
 
-export function AddExpenseSheet({
-  open,
-  onClose,
-  profiles,
-  currentProfileId,
-}: AddExpenseSheetProps) {
+export function AddExpenseSheet({ onClose, profiles, currentProfileId }: AddExpenseSheetProps) {
   const [amountCents, setAmountCents] = useState(0)
   const [paidBy, setPaidBy] = useState(currentProfileId)
   const [split, setSplit] = useState<Split>('equal')
@@ -30,33 +24,22 @@ export function AddExpenseSheet({
   const [editingDate, setEditingDate] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function close() {
-    setAmountCents(0)
-    setPaidBy(currentProfileId)
-    setSplit('equal')
-    setDescription('')
-    setDate(todayMontreal())
-    setEditingDate(false)
-    setError(null)
-    onClose()
-  }
-
   const payer = profiles.find((profile) => profile.id === paidBy)!
   const other = profiles.find((profile) => profile.id !== paidBy)!
 
   return (
-    <Sheet open={open} onClose={close}>
+    <Sheet open onClose={onClose}>
       <form
         className="flex flex-col gap-4"
         onSubmit={async (event) => {
           event.preventDefault()
           const result = await addExpense({ amountCents, paidBy, split, description, date })
           if (result.error) setError(result.error)
-          else close()
+          else onClose()
         }}
       >
         <div className="flex justify-end">
-          <button type="button" onClick={close} className="text-accent">
+          <button type="button" onClick={onClose} className="text-accent">
             Annuler
           </button>
         </div>

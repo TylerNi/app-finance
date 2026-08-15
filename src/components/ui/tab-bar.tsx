@@ -45,12 +45,13 @@ export function TabBar({ profiles, currentProfileId }: TabBarProps) {
           </button>
         </div>
       </nav>
-      <AddExpenseSheet
-        open={open}
-        onClose={() => setOpen(false)}
-        profiles={profiles}
-        currentProfileId={currentProfileId}
-      />
+      {open && (
+        <AddExpenseSheet
+          onClose={() => setOpen(false)}
+          profiles={profiles}
+          currentProfileId={currentProfileId}
+        />
+      )}
     </>
   )
 }
