@@ -1,10 +1,13 @@
 import { TabBar } from '@/components/ui/tab-bar'
+import { getCurrentProfile, getProfiles } from '@/lib/profiles'
 
-export default function AppLayout({ children }: LayoutProps<'/'>) {
+export default async function AppLayout({ children }: LayoutProps<'/'>) {
+  const [profiles, profile] = await Promise.all([getProfiles(), getCurrentProfile()])
+
   return (
     <>
       {children}
-      <TabBar />
+      <TabBar profiles={profiles} currentProfileId={profile.id} />
     </>
   )
 }

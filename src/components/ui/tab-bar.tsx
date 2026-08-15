@@ -3,14 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Sheet } from './sheet'
+import { AddExpenseSheet } from '@/components/add-expense-sheet'
+import type { Profile } from '@/types/db'
 
 const tabs = [
   { href: '/', label: 'Mois' },
   { href: '/rapports', label: 'Rapports' },
 ]
 
-export function TabBar() {
+type TabBarProps = {
+  profiles: Profile[]
+  currentProfileId: string
+}
+
+export function TabBar({ profiles, currentProfileId }: TabBarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -39,7 +45,12 @@ export function TabBar() {
           </button>
         </div>
       </nav>
-      <Sheet open={open} onClose={() => setOpen(false)} />
+      <AddExpenseSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        profiles={profiles}
+        currentProfileId={currentProfileId}
+      />
     </>
   )
 }
