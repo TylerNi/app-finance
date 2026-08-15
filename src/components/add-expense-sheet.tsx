@@ -25,7 +25,6 @@ export function AddExpenseSheet({
   defaultDate,
 }: AddExpenseSheetProps) {
   const [amountCents, setAmountCents] = useState(expense?.amount_cents ?? 0)
-  const [paidBy, setPaidBy] = useState(expense?.paid_by ?? currentProfileId)
   const [split, setSplit] = useState<Split>(expense?.split ?? 'payer')
   const [description, setDescription] = useState(expense?.description ?? '')
   const [saving, setSaving] = useState(false)
@@ -33,6 +32,7 @@ export function AddExpenseSheet({
   const [error, setError] = useState<string | null>(null)
 
   const date = expense?.date ?? defaultDate ?? todayMontreal()
+  const paidBy = expense?.paid_by ?? currentProfileId
 
   const payer = profiles.find((profile) => profile.id === paidBy)!
   const other = profiles.find((profile) => profile.id !== paidBy)!
@@ -65,15 +65,6 @@ export function AddExpenseSheet({
             setError(null)
           }}
         />
-
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted">Payé par</p>
-          <SegmentedControl
-            options={profiles.map((profile) => ({ value: profile.id, label: profile.name }))}
-            value={paidBy}
-            onChange={setPaidBy}
-          />
-        </div>
 
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted">Partage</p>
